@@ -2,15 +2,18 @@
 <html>
 <head>
     <title>Napi beosztás</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             text-align: center;
-            margin: 50px;
+            margin: 20px;
+            padding: 10px;
         }
-        h2 {
+        h2, h3 {
             color: #333;
+            font-size: 18px;
         }
         select, input {
             font-size: 16px;
@@ -18,15 +21,17 @@
             margin: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            width: 90%;
+            max-width: 300px;
         }
         p {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #007BFF;
         }
         .container {
             background: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             max-width: 400px;
@@ -35,6 +40,7 @@
         ul {
             list-style-type: none;
             padding: 0;
+            text-align: left;
         }
         li {
             background: #e9ecef;
@@ -103,18 +109,6 @@
             });
         }
         
-        function updateSchedule() {
-            let name = document.getElementById("nameSelect").value;
-            let date = document.getElementById("dateSelect").value;
-            let output = document.getElementById("scheduleOutput");
-            
-            if (scheduleData[name] && scheduleData[name][date]) {
-                output.textContent = "Beosztás: " + scheduleData[name][date];
-            } else {
-                output.textContent = "Nincs adat erre a napra.";
-            }
-        }
-        
         function listShiftsForMonth() {
             let name = document.getElementById("nameSelect").value;
             let month = document.getElementById("monthSelect").value;
@@ -132,26 +126,42 @@
             });
         }
         
+        function listShiftsForDate() {
+            let date = document.getElementById("dateSelect").value;
+            let output = document.getElementById("shiftOutput");
+            output.innerHTML = "";
+            
+            Object.keys(scheduleData).forEach(name => {
+                let shift = scheduleData[name][date];
+                if (shift && shift !== "Normál" && shift !== "") {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = `${name}: ${shift}`;
+                    output.appendChild(listItem);
+                }
+            });
+        }
+        
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
     </script>
 </head>
 <body>
     <div class="container">
         <h2>Válaszd ki a neved:</h2>
-        <select id="nameSelect" onchange="updateSchedule(); listShiftsForMonth();">
+        <select id="nameSelect" onchange="listShiftsForMonth()">
             <option value="">--Válassz--</option>
         </select>
-        
-        <h2>Válassz dátumot:</h2>
-        <input type="date" id="dateSelect" onchange="updateSchedule()">
-        
-        <p id="scheduleOutput">Beosztás:</p>
         
         <h2>Válassz hónapot:</h2>
         <input type="month" id="monthSelect" onchange="listShiftsForMonth()">
         
         <h3>Ügyeletek az adott hónapban:</h3>
         <ul id="shiftList"></ul>
+        
+        <h2>Válassz egy dátumot:</h2>
+        <input type="date" id="dateSelect" onchange="listShiftsForDate()">
+        
+        <h3>Ügyeletesek ezen a napon:</h3>
+        <ul id="shiftOutput"></ul>
     </div>
 </body>
 </html>
