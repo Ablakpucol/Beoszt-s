@@ -61,6 +61,7 @@
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
                     populateNameDropdown();
+                    listShiftsForDate(new Date().toISOString().split('T')[0]); // Az aktuális nap ügyeleteseinek betöltése
                 })
                 .catch(error => console.error('Hiba az adatok lekérésekor:', error));
         }
@@ -109,36 +110,39 @@
             });
         }
         
-        function listShiftsForMonth() {
-            let name = document.getElementById("nameSelect").value;
-            let month = document.getElementById("monthSelect").value;
-            let shiftList = document.getElementById("shiftList");
-            shiftList.innerHTML = "";
-            
-            if (!scheduleData[name]) return;
-            
-            Object.keys(scheduleData[name]).forEach(date => {
-                if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "") {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = `${date}: ${scheduleData[name][date]}`;
-                    shiftList.appendChild(listItem);
-                }
-            });
-        }
-        
-        function listShiftsForDate() {
-            let date = document.getElementById("dateSelect").value;
+        function listShiftsForDate(date) {
             let output = document.getElementById("shiftOutput");
             output.innerHTML = "";
             
+            let dutyList = [];
+            let vacationList = [];
+            
             Object.keys(scheduleData).forEach(name => {
                 let shift = scheduleData[name][date];
-                if (shift && shift !== "Normál" && shift !== "") {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = `${name}: ${shift}`;
-                    output.appendChild(listItem);
+                if (shift === "Szabadság") {
+                    vacationList.push(name);
+                } else if (shift && shift !== "Normál" && shift !== "") {
+                    dutyList.push(`${name}: ${shift}`);
                 }
             });
+            
+            if (dutyList.length > 0) {
+                output.innerHTML += "<h3>Ügyeletesek:</h3>";
+                dutyList.forEach(item => {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = item;
+                    output.appendChild(listItem);
+                });
+            }
+            
+            if (vacationList.length > 0) {
+                output.innerHTML += "<h3>Szabadságon lévők:</h3>";
+                vacationList.forEach(name => {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = name;
+                    output.appendChild(listItem);
+                });
+            }
         }
         
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
@@ -147,21 +151,14 @@
 <body>
     <div class="container">
         <h2>Válaszd ki a neved:</h2>
-        <select id="nameSelect" onchange="listShiftsForMonth()">
+        <select id="nameSelect" onchange="listShiftsForDate(new Date().toISOString().split('T')[0])">
             <option value="">--Válassz--</option>
         </select>
         
-        <h2>Válassz hónapot:</h2>
-        <input type="month" id="monthSelect" onchange="listShiftsForMonth()">
-        
-        <h3>Ügyeletek az adott hónapban:</h3>
-        <ul id="shiftList"></ul>
-        
         <h2>Válassz egy dátumot:</h2>
-        <input type="date" id="dateSelect" onchange="listShiftsForDate()">
+        <input type="date" id="dateSelect" onchange="listShiftsForDate(this.value)">
         
-        <h3>Ügyeletesek ezen a napon:</h3>
-        <ul id="shiftOutput"></ul>
+        <div id="shiftOutput"></div>
     </div>
 </body>
 </html>
