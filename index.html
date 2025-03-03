@@ -4,13 +4,14 @@
     <title>Napi beosztás</title>
     <script>
         let scheduleData = {};
-        const sheetID = "https://docs.google.com/spreadsheets/d/1_51aHTZbSH2WIA4Pa59kkl5ukgnAZpCPitBz96lQdeI/edit?usp=drivesdk"; // IDE ÍRD BE A GOOGLE SHEETS AZONOSÍTÓDAT!
+        const sheetID = "1_51aHTZbSH2WIA4Pa59kkl5ukgnAZpCPitBz96lQdeI"; // Google Sheets azonosító
         const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
         
         function fetchScheduleData() {
             fetch(apiURL)
                 .then(response => response.text())
                 .then(data => {
+                    console.log("Google Sheets válasz:", data); // Debug log
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
                     populateNameDropdown();
@@ -20,7 +21,7 @@
         
         function processSheetData(rows) {
             let data = {};
-            let dates = rows[0].c.slice(1).map(cell => cell.v);
+            let dates = rows[0].c.slice(1).map(cell => cell?.v);
             
             for (let i = 1; i < rows.length; i++) {
                 let name = rows[i].c[0]?.v;
