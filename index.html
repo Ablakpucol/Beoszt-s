@@ -72,7 +72,6 @@
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
                     populateNameDropdown();
-                    listShiftsForDate(new Date().toISOString().split('T')[0]); // Az aktuális nap ügyeleteseinek betöltése
                 })
                 .catch(error => console.error('Hiba az adatok lekérésekor:', error));
         }
@@ -122,12 +121,12 @@
         }
         
         function listShiftsForMonth() {
-            let name = document.getElementById("nameSelect");
-            let month = document.getElementById("monthSelect");
+            let name = document.getElementById("nameSelect").value;
+            let month = document.getElementById("monthSelect").value;
             let shiftList = document.getElementById("shiftList");
             shiftList.innerHTML = "";
             
-            if (!scheduleData[name]) return;
+            if (!scheduleData[name] || !month) return;
             
             Object.keys(scheduleData[name]).forEach(date => {
                 if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "Szabadság" && scheduleData[name][date] !== "") {
