@@ -110,39 +110,21 @@
             });
         }
         
-        function listShiftsForDate(date) {
-            let output = document.getElementById("shiftOutput");
-            output.innerHTML = "";
+        function listShiftsForMonth() {
+            let name = document.getElementById("nameSelect").value;
+            let month = document.getElementById("monthSelect").value;
+            let shiftList = document.getElementById("shiftList");
+            shiftList.innerHTML = "";
             
-            let dutyList = [];
-            let vacationList = [];
+            if (!scheduleData[name]) return;
             
-            Object.keys(scheduleData).forEach(name => {
-                let shift = scheduleData[name][date];
-                if (shift === "Szabadság") {
-                    vacationList.push(name);
-                } else if (shift && shift !== "Normál" && shift !== "") {
-                    dutyList.push(`${name}: ${shift}`);
+            Object.keys(scheduleData[name]).forEach(date => {
+                if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "Szabadság" && scheduleData[name][date] !== "") {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = `${date}: ${scheduleData[name][date]}`;
+                    shiftList.appendChild(listItem);
                 }
             });
-            
-            if (dutyList.length > 0) {
-                output.innerHTML += "<h3>Ügyeletesek:</h3>";
-                dutyList.forEach(item => {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = item;
-                    output.appendChild(listItem);
-                });
-            }
-            
-            if (vacationList.length > 0) {
-                output.innerHTML += "<h3>Szabadságon lévők:</h3>";
-                vacationList.forEach(name => {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = name;
-                    output.appendChild(listItem);
-                });
-            }
         }
         
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
@@ -151,14 +133,18 @@
 <body>
     <div class="container">
         <h2>Válaszd ki a neved:</h2>
-        <select id="nameSelect" onchange="listShiftsForDate(new Date().toISOString().split('T')[0])">
+        <select id="nameSelect" onchange="listShiftsForMonth()">
             <option value="">--Válassz--</option>
         </select>
         
-        <h2>Válassz egy dátumot:</h2>
-        <input type="date" id="dateSelect" onchange="listShiftsForDate(this.value)">
+        <h2>Válassz hónapot:</h2>
+        <input type="month" id="monthSelect" onchange="listShiftsForMonth()">
         
-        <div id="shiftOutput"></div>
+        <h3>Ügyeletek az adott hónapban:</h3>
+        <ul id="shiftList"></ul>
+        
+        <h2>Mai ügyeletesek:</h2>
+        <ul id="shiftOutput"></ul>
     </div>
 </body>
 </html>
