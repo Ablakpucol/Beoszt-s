@@ -22,8 +22,8 @@
         
         function processSheetData(rows) {
             let data = {};
-            let dates = rows[0].c.slice(1).map(cell => formatDate(cell?.v));
-            console.log("Dátumok:", dates);
+            let dates = rows[0].c.slice(1).map(cell => validateAndFormatDate(cell?.v));
+            console.log("Dátumok feldolgozása:", dates);
             
             for (let i = 1; i < rows.length; i++) {
                 let name = rows[i].c[0]?.v;
@@ -42,12 +42,24 @@
             return data;
         }
         
-        function formatDate(serial) {
-            if (!serial) return "";
-            let date = new Date(Math.round((serial - 25569) * 86400 * 1000));
-            let formattedDate = date.toISOString().split('T')[0];
-            console.log("Átalakított dátum:", formattedDate);
-            return formattedDate;
+        function validateAndFormatDate(value) {
+            console.log("Ellenőrzött dátum érték:", value);
+            
+            // Ha a dátum már szövegként van tárolva (pl. '2025-03-04'), hagyjuk úgy
+            if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return value;
+            }
+            
+            // Ha a dátum számként jött (Excel formátum), konvertáljuk
+            if (typeof value === "number") {
+                let date = new Date(Math.round((value - 25569) * 86400 * 1000));
+                let formattedDate = date.toISOString().split('T')[0];
+                console.log("Átalakított dátum:", formattedDate);
+                return formattedDate;
+            }
+            
+            console.warn("Érvénytelen dátumérték kihagyva:", value);
+            return "";
         }
         
         function populateNameDropdown() {
