@@ -45,9 +45,14 @@
         function validateAndFormatDate(value) {
             console.log("Ellenőrzött dátum érték:", value);
             
-            // Ha a dátum már szövegként van tárolva (pl. '2025-03-04'), hagyjuk úgy
+            // Ha a dátum már szövegként van tárolva "YYYY-MM-DD" formátumban, hagyjuk meg
             if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 return value;
+            }
+            
+            // Ha a dátum "YYYY.MM.DD" formátumban jött, alakítsuk át "YYYY-MM-DD" formátumra
+            if (typeof value === "string" && value.match(/^\d{4}\.\d{2}\.\d{2}$/)) {
+                return value.replaceAll(".", "-");
             }
             
             // Ha a dátum számként jött (Excel formátum), konvertáljuk
