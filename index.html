@@ -14,6 +14,7 @@
                     console.log("Google Sheets válasz:", data); // Debug log
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
+                    console.log("Feldolgozott adatok:", scheduleData); // Ellenőrzéshez
                     populateNameDropdown();
                 })
                 .catch(error => console.error('Hiba az adatok lekérésekor:', error));
@@ -21,7 +22,7 @@
         
         function processSheetData(rows) {
             let data = {};
-            let dates = rows[0].c.slice(1).map(cell => cell?.v);
+            let dates = rows[0].c.slice(1).map(cell => formatDate(cell?.v));
             
             for (let i = 1; i < rows.length; i++) {
                 let name = rows[i].c[0]?.v;
@@ -39,6 +40,12 @@
             return data;
         }
         
+        function formatDate(serial) {
+            if (!serial) return "";
+            let date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+            return date.toISOString().split('T')[0];
+        }
+        
         function populateNameDropdown() {
             let select = document.getElementById("nameSelect");
             select.innerHTML = '<option value="">--Válassz--</option>';
@@ -53,6 +60,10 @@
         function updateSchedule() {
             let name = document.getElementById("nameSelect").value;
             let date = document.getElementById("dateSelect").value;
+            
+            console.log("Kiválasztott név:", name);
+            console.log("Kiválasztott dátum:", date);
+            console.log("Lekért adat:", scheduleData[name]?.[date]);
             
             if (scheduleData[name] && scheduleData[name][date]) {
                 document.getElementById("scheduleOutput").textContent = "Beosztás: " + scheduleData[name][date];
