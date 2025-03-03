@@ -2,19 +2,58 @@
 <html>
 <head>
     <title>Napi beosztás</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 50px;
+        }
+        h2 {
+            color: #333;
+        }
+        select, input {
+            font-size: 16px;
+            padding: 8px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #e9ecef;
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+    </style>
     <script>
         let scheduleData = {};
-        const sheetID = "1_51aHTZbSH2WIA4Pa59kkl5ukgnAZpCPitBz96lQdeI"; // Google Sheets azonosító
+        const sheetID = "1_51aHTZbSH2WIA4Pa59kkl5ukgnAZpCPitBz96lQdeI";
         const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
         
         function fetchScheduleData() {
             fetch(apiURL)
                 .then(response => response.text())
                 .then(data => {
-                    console.log("Google Sheets válasz:", data); // Debug log
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
-                    console.log("Feldolgozott adatok:", scheduleData); // Ellenőrzéshez
                     populateNameDropdown();
                 })
                 .catch(error => console.error('Hiba az adatok lekérésekor:', error));
@@ -23,13 +62,10 @@
         function processSheetData(rows) {
             let data = {};
             let dates = rows[0].c.slice(1).map(cell => validateAndFormatDate(cell?.v));
-            console.log("Dátumok feldolgozása:", dates);
             
             for (let i = 1; i < rows.length; i++) {
                 let name = rows[i].c[0]?.v;
-                console.log("Feldolgozott név:", name);
                 if (!name) continue;
-                
                 data[name] = {};
                 for (let j = 1; j < rows[i].c.length; j++) {
                     let date = dates[j - 1];
@@ -43,42 +79,23 @@
         }
         
         function validateAndFormatDate(value) {
-            console.log("Ellenőrzött dátum érték:", value);
-            
-            // Ha a dátum már szövegként van tárolva "YYYY-MM-DD" formátumban, hagyjuk meg
             if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 return value;
             }
-            
-            // Ha a dátum "YYYY.MM.DD" formátumban jött, alakítsuk át "YYYY-MM-DD" formátumra
             if (typeof value === "string" && value.match(/^\d{4}\.\d{2}\.\d{2}$/)) {
                 return value.replaceAll(".", "-");
             }
-            
-            // Ha a dátum számként jött (Excel formátum), konvertáljuk
             if (typeof value === "number") {
                 let date = new Date(Math.round((value - 25569) * 86400 * 1000));
-                let formattedDate = date.toISOString().split('T')[0];
-                console.log("Átalakított dátum:", formattedDate);
-                return formattedDate;
+                return date.toISOString().split('T')[0];
             }
-            
-            console.warn("Érvénytelen dátumérték kihagyva:", value);
             return "";
         }
         
         function populateNameDropdown() {
             let select = document.getElementById("nameSelect");
             select.innerHTML = '<option value="">--Válassz--</option>';
-            
-            let names = Object.keys(scheduleData);
-            console.log("Legördülő menü nevei:", names);
-            
-            if (names.length === 0) {
-                console.error("Nincs elérhető név az adatokban.");
-            }
-            
-            names.forEach(name => {
+            Object.keys(scheduleData).forEach(name => {
                 let option = document.createElement("option");
                 option.value = name;
                 option.textContent = name;
@@ -89,30 +106,52 @@
         function updateSchedule() {
             let name = document.getElementById("nameSelect").value;
             let date = document.getElementById("dateSelect").value;
-            
-            console.log("Kiválasztott név:", name);
-            console.log("Kiválasztott dátum:", date);
-            console.log("Lekért adat:", scheduleData[name]?.[date]);
+            let output = document.getElementById("scheduleOutput");
             
             if (scheduleData[name] && scheduleData[name][date]) {
-                document.getElementById("scheduleOutput").textContent = "Beosztás: " + scheduleData[name][date];
+                output.textContent = "Beosztás: " + scheduleData[name][date];
             } else {
-                document.getElementById("scheduleOutput").textContent = "Nincs adat erre a napra.";
+                output.textContent = "Nincs adat erre a napra.";
             }
         }
         
-        window.onload = fetchScheduleData;
+        function listShiftsForMonth() {
+            let name = document.getElementById("nameSelect").value;
+            let month = document.getElementById("monthSelect").value;
+            let shiftList = document.getElementById("shiftList");
+            shiftList.innerHTML = "";
+            
+            if (!scheduleData[name]) return;
+            
+            Object.keys(scheduleData[name]).forEach(date => {
+                if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "") {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = `${date}: ${scheduleData[name][date]}`;
+                    shiftList.appendChild(listItem);
+                }
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", fetchScheduleData);
     </script>
 </head>
 <body>
-    <h2>Válaszd ki a neved:</h2>
-    <select id="nameSelect" onchange="updateSchedule()">
-        <option value="">--Válassz--</option>
-    </select>
-    
-    <h2>Válassz dátumot:</h2>
-    <input type="date" id="dateSelect" onchange="updateSchedule()">
-    
-    <p id="scheduleOutput">Beosztás:</p>
+    <div class="container">
+        <h2>Válaszd ki a neved:</h2>
+        <select id="nameSelect" onchange="updateSchedule(); listShiftsForMonth();">
+            <option value="">--Válassz--</option>
+        </select>
+        
+        <h2>Válassz dátumot:</h2>
+        <input type="date" id="dateSelect" onchange="updateSchedule()">
+        
+        <p id="scheduleOutput">Beosztás:</p>
+        
+        <h2>Válassz hónapot:</h2>
+        <input type="month" id="monthSelect" onchange="listShiftsForMonth()">
+        
+        <h3>Ügyeletek az adott hónapban:</h3>
+        <ul id="shiftList"></ul>
+    </div>
 </body>
 </html>
