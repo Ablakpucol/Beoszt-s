@@ -118,27 +118,21 @@
             });
         }
         
-        function listShiftsForDate(date) {
-            let output = document.getElementById("shiftOutput");
-            output.innerHTML = "";
+        function listShiftsForMonth() {
+            let name = document.getElementById("nameSelect").value;
+            let month = document.getElementById("monthSelect").value;
+            let shiftList = document.getElementById("shiftList");
+            shiftList.innerHTML = "";
             
-            let dutyList = [];
-            Object.keys(scheduleData).forEach(name => {
-                let shift = scheduleData[name][date];
-                if (shift && shift !== "Normál" && shift !== "Szabadság" && shift !== "") {
-                    dutyList.push(`${name}: ${shift}`);
+            if (!scheduleData[name]) return;
+            
+            Object.keys(scheduleData[name]).forEach(date => {
+                if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "Szabadság" && scheduleData[name][date] !== "") {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = `${date}: ${scheduleData[name][date]}`;
+                    shiftList.appendChild(listItem);
                 }
             });
-            
-            if (dutyList.length > 0) {
-                dutyList.forEach(item => {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = item;
-                    output.appendChild(listItem);
-                });
-            } else {
-                output.innerHTML = "<p>Nincs ügyeletes erre a napra.</p>";
-            }
         }
         
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
