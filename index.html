@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Napi beosztás</title>
+    <script>
+        let scheduleData = {};
+        const sheetID = "https://docs.google.com/spreadsheets/d/1_51aHTZbSH2WIA4Pa59kkl5ukgnAZpCPitBz96lQdeI/edit?usp=drivesdk"; // IDE ÍRD BE A GOOGLE SHEETS AZONOSÍTÓDAT!
+        const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+        
+        function fetchScheduleData() {
+            fetch(apiURL)
+                .then(response => response.text())
+                .then(data => {
+                    let json = JSON.parse(data.substring(47, data.length - 2));
+                    scheduleData = processSheetData(json.table.rows);
+                    populateNameDropdown();
+                })
+                .catch(error => console.error('Hiba az adatok lekérésekor:', error));
+        }
+        
+        function processSheetData(rows) {
+            let data = {};
+            let dates = rows[0].c.slice(1).map(cell => cell.v);
+            
+            for (let i = 1; i < rows.length; i++) {
+                let name = rows[i].c[0]?.v;
+                if (!name) continue;
+                
+                data[name] = {};
+                for (let j = 1; j < rows[i].c.length; j++) {
+                    let date = dates[j - 1];
+                    let shift = rows[i].c[j]?.v || "";
+                    if (date && shift) {
+                        data[name][date] = shift;
+                    }
+                }
+            }
+            return data;
+        }
+        
+        function populateNameDropdown() {
+            let select = document.getElementById("nameSelect");
+            select.innerHTML = '<option value="">--Válassz--</option>';
+            for (let name in scheduleData) {
+                let option = document.createElement("option");
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            }
+        }
+        
+        function updateSchedule() {
+            let name = document.getElementById("nameSelect").value;
+            let date = document.getElementById("dateSelect").value;
+            
+            if (scheduleData[name] && scheduleData[name][date]) {
+                document.getElementById("scheduleOutput").textContent = "Beosztás: " + scheduleData[name][date];
+            } else {
+                document.getElementById("scheduleOutput").textContent = "Nincs adat erre a napra.";
+            }
+        }
+        
+        window.onload = fetchScheduleData;
+    </script>
+</head>
+<body>
+    <h2>Válaszd ki a neved:</h2>
+    <select id="nameSelect" onchange="updateSchedule()">
+        <option value="">--Válassz--</option>
+    </select>
+    
+    <h2>Válassz dátumot:</h2>
+    <input type="date" id="dateSelect" onchange="updateSchedule()">
+    
+    <p id="scheduleOutput">Beosztás:</p>
+</body>
+</html>
