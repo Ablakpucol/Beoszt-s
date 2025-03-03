@@ -127,6 +127,41 @@
             });
         }
         
+        function listShiftsForDate(date) {
+            let output = document.getElementById("shiftOutput");
+            output.innerHTML = "";
+            
+            let dutyList = [];
+            let vacationList = [];
+            
+            Object.keys(scheduleData).forEach(name => {
+                let shift = scheduleData[name][date];
+                if (shift === "Szabadság") {
+                    vacationList.push(name);
+                } else if (shift && shift !== "Normál" && shift !== "") {
+                    dutyList.push(`${name}: ${shift}`);
+                }
+            });
+            
+            if (dutyList.length > 0) {
+                output.innerHTML += "<h3>Ügyeletesek:</h3>";
+                dutyList.forEach(item => {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = item;
+                    output.appendChild(listItem);
+                });
+            }
+            
+            if (vacationList.length > 0) {
+                output.innerHTML += "<h3>Szabadságon lévők:</h3>";
+                vacationList.forEach(name => {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = name;
+                    output.appendChild(listItem);
+                });
+            }
+        }
+        
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
     </script>
 </head>
