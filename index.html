@@ -5,24 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
             text-align: center;
             margin: 20px;
             padding: 10px;
         }
         h2, h3 {
-            color: #333;
-            font-size: 18px;
+            color: #212529;
+            font-size: 20px;
         }
         select, input {
             font-size: 16px;
-            padding: 8px;
+            padding: 12px;
             margin: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 90%;
-            max-width: 300px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            width: 95%;
+            max-width: 350px;
+            background: #ffffff;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
         }
         p {
             font-size: 16px;
@@ -31,11 +33,15 @@
         }
         .container {
             background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
             margin: auto;
+            transition: 0.3s;
+        }
+        .container:hover {
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
         }
         ul {
             list-style-type: none;
@@ -44,9 +50,9 @@
         }
         li {
             background: #e9ecef;
-            padding: 8px;
+            padding: 12px;
             margin: 5px;
-            border-radius: 5px;
+            border-radius: 8px;
         }
     </style>
     <script>
@@ -125,41 +131,6 @@
                     shiftList.appendChild(listItem);
                 }
             });
-        }
-        
-        function listShiftsForDate(date) {
-            let output = document.getElementById("shiftOutput");
-            output.innerHTML = "";
-            
-            let dutyList = [];
-            let vacationList = [];
-            
-            Object.keys(scheduleData).forEach(name => {
-                let shift = scheduleData[name][date];
-                if (shift === "Szabadság") {
-                    vacationList.push(name);
-                } else if (shift && shift !== "Normál" && shift !== "") {
-                    dutyList.push(`${name}: ${shift}`);
-                }
-            });
-            
-            if (dutyList.length > 0) {
-                output.innerHTML += "<h3>Ügyeletesek:</h3>";
-                dutyList.forEach(item => {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = item;
-                    output.appendChild(listItem);
-                });
-            }
-            
-            if (vacationList.length > 0) {
-                output.innerHTML += "<h3>Szabadságon lévők:</h3>";
-                vacationList.forEach(name => {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = name;
-                    output.appendChild(listItem);
-                });
-            }
         }
         
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
