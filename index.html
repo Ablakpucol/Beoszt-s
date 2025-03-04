@@ -5,66 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             text-align: center;
             margin: 20px;
             padding: 10px;
         }
-        h2, h3 {
-            color: #212529;
-            font-size: 20px;
+        h2 {
+            color: #333;
         }
         select, input {
             font-size: 16px;
-            padding: 12px;
+            padding: 8px;
             margin: 10px;
-            border-radius: 8px;
-            border: 1px solid #ced4da;
+            border-radius: 5px;
+            border: 1px solid #ccc;
             width: 95%;
             max-width: 350px;
             background: #ffffff;
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
         }
         p {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             color: #007BFF;
         }
         .container {
             background: white;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-            max-width: 450px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
             margin: auto;
-            transition: 0.3s;
-        }
-        .container:hover {
-            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
-        }
-        .separator {
-            border-top: 2px solid #ccc;
-            margin: 20px 0;
-            padding-top: 10px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-            text-align: left;
-        }
-        li {
-            background: #e9ecef;
-            padding: 12px;
-            margin: 5px;
-            border-radius: 8px;
         }
     </style>
     <script>
         let scheduleData = {};
         const sheetID = "1_51aHTZbSH2WIA4Pa59kkl5ukgnAZpCPitBz96lQdeI";
         const apiURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
-        
+
         function fetchScheduleData() {
             fetch(apiURL)
                 .then(response => response.text())
@@ -72,16 +51,15 @@
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
                     populateNameDropdown();
-                    listShiftsForMonth();
                     listShiftsForDate(new Date().toISOString().split('T')[0]);
                 })
                 .catch(error => console.error('Hiba az adatok lekérésekor:', error));
         }
-        
+
         function processSheetData(rows) {
             let data = {};
             let dates = rows[0].c.slice(1).map(cell => validateAndFormatDate(cell?.v));
-            
+
             for (let i = 1; i < rows.length; i++) {
                 let name = rows[i].c[0]?.v;
                 if (!name) continue;
@@ -96,10 +74,13 @@
             }
             return data;
         }
-        
+
         function validateAndFormatDate(value) {
             if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 return value;
+            }
+            if (typeof value === "string" && value.match(/^\d{4}\.\d{2}\.\d{2}$/)) {
+                return value.replaceAll(".", "-");
             }
             if (typeof value === "number") {
                 let date = new Date(Math.round((value - 25569) * 86400 * 1000));
@@ -107,7 +88,7 @@
             }
             return "";
         }
-        
+
         function populateNameDropdown() {
             let select = document.getElementById("nameSelect");
             select.innerHTML = '<option value="">--Válassz--</option>';
@@ -118,26 +99,21 @@
                 select.appendChild(option);
             });
         }
-        
-        function listShiftsForMonth() {
+
+        function updateSchedule() {
             let name = document.getElementById("nameSelect").value;
-            let month = document.getElementById("monthSelect").value;
-            let shiftList = document.getElementById("shiftList");
-            shiftList.innerHTML = "";
-            
-            if (!scheduleData[name]) return;
-            
-            Object.keys(scheduleData[name]).forEach(date => {
-                if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "Szabadság" && scheduleData[name][date] !== "") {
-                    let listItem = document.createElement("li");
-                    listItem.textContent = `${date}: ${scheduleData[name][date]}`;
-                    shiftList.appendChild(listItem);
-                }
-            });
+            let date = document.getElementById("dateSelect").value;
+            let output = document.getElementById("scheduleOutput");
+
+            if (scheduleData[name] && scheduleData[name][date]) {
+                output.textContent = "Beosztás: " + scheduleData[name][date];
+            } else {
+                output.textContent = "Nincs adat erre a napra.";
+            }
         }
-        
+
         function listShiftsForDate(date) {
-            let output = document.getElementById("shiftOutput");
+            let output = document.getElementById("scheduleOutput");
             output.innerHTML = "";
             let dutyList = [];
             Object.keys(scheduleData).forEach(name => {
@@ -148,7 +124,7 @@
             });
             if (dutyList.length > 0) {
                 dutyList.forEach(item => {
-                    let listItem = document.createElement("li");
+                    let listItem = document.createElement("p");
                     listItem.textContent = item;
                     output.appendChild(listItem);
                 });
@@ -156,27 +132,21 @@
                 output.innerHTML = "<p>Nincs ügyeletes erre a napra.</p>";
             }
         }
-        
+
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
     </script>
 </head>
 <body>
     <div class="container">
         <h2>Válaszd ki a neved:</h2>
-        <select id="nameSelect" onchange="listShiftsForMonth()">
+        <select id="nameSelect" onchange="updateSchedule()">
             <option value="">--Válassz--</option>
         </select>
-        
-        <h2>Válassz hónapot:</h2>
-        <input type="month" id="monthSelect" onchange="listShiftsForMonth()">
-        
-        <h3>Ügyeletek az adott hónapban:</h3>
-        <ul id="shiftList"></ul>
-        
-        <div class="separator"></div>
-        
-        <h2>Mai ügyeletesek:</h2>
-        <ul id="shiftOutput"></ul>
+
+        <h2>Válassz dátumot:</h2>
+        <input type="date" id="dateSelect" onchange="updateSchedule()">
+
+        <p id="scheduleOutput">Beosztás:</p>
     </div>
 </body>
 </html>
