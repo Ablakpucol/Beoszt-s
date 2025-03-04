@@ -97,15 +97,32 @@
             let shiftList = document.getElementById("shiftList");
             shiftList.innerHTML = "";
             
-            if (!scheduleData[name]) return;
+            if (!name || !month || !scheduleData[name]) return;
             
             Object.keys(scheduleData[name]).forEach(date => {
-                if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "Szabadság" && scheduleData[name][date] !== "") {
+                if (date.startsWith(month + "-") && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "Szabadság" && scheduleData[name][date] !== "") {
                     let listItem = document.createElement("p");
                     listItem.textContent = `${date}: ${scheduleData[name][date]}`;
                     shiftList.appendChild(listItem);
                 }
             });
+        }
+
+        function listShiftsForDate(date) {
+            let output = document.getElementById("shiftOutput");
+            output.innerHTML = "";
+            let dutyList = [];
+            Object.keys(scheduleData).forEach(name => {
+                let shift = scheduleData[name][date];
+                if (shift && shift !== "Normál" && shift !== "Szabadság" && shift !== "") {
+                    dutyList.push(`<strong>${name}</strong>: ${shift}`);
+                }
+            });
+            if (dutyList.length > 0) {
+                output.innerHTML = dutyList.join("<br>");
+            } else {
+                output.innerHTML = "<p>Nincs ügyeletes erre a napra.</p>";
+            }
         }
 
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
