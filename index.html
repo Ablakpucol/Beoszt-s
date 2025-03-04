@@ -113,13 +113,21 @@
         function updateScheduleByDate() {
             let date = document.getElementById("dateSelect").value;
             let output = document.getElementById("scheduleByDate");
+            let leaveOutput = "";
             output.innerHTML = "";
             
             Object.keys(scheduleData).forEach(name => {
                 if (scheduleData[name][date]) {
-                    output.innerHTML += `<p>${name}: ${scheduleData[name][date]}</p>`;
+                    if (scheduleData[name][date] === "Szabadság") {
+                        leaveOutput += `<p>${name}: ${scheduleData[name][date]}</p>`;
+                    } else {
+                        output.innerHTML += `<p>${name}: ${scheduleData[name][date]}</p>`;
+                    }
                 }
             });
+            if (leaveOutput) {
+                output.innerHTML += `<hr><h3>Szabadság:</h3>` + leaveOutput;
+            }
         }
         
         function autoUpdateScheduleByDate() {
