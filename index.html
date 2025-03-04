@@ -61,7 +61,7 @@
                 for (let j = 1; j < rows[i].c.length; j++) {
                     let date = dates[j - 1];
                     let shift = rows[i].c[j]?.v || "";
-                    if (date && shift) {
+                    if (date && shift && shift !== "Normál") {
                         data[name][date] = shift;
                     }
                 }
@@ -95,15 +95,15 @@
         }
         
         function updateScheduleByName() {
-            let name = document.getElementById("nameSelect").value;
-            let month = document.getElementById("monthSelect").value;
+            let name = document.getElementById("nameSelect");
+            let month = document.getElementById("monthSelect");
             let output = document.getElementById("scheduleByName");
             output.innerHTML = "";
             
-            if (scheduleData[name]) {
-                Object.keys(scheduleData[name]).forEach(date => {
-                    if (date.startsWith(month)) {
-                        output.innerHTML += `<p>${date}: ${scheduleData[name][date]}</p>`;
+            if (scheduleData[name.value]) {
+                Object.keys(scheduleData[name.value]).forEach(date => {
+                    if (date.startsWith(month.value)) {
+                        output.innerHTML += `<p>${date}: ${scheduleData[name.value][date]}</p>`;
                     }
                 });
             }
