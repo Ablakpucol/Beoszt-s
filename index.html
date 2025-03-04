@@ -43,17 +43,6 @@
             margin: 20px 0;
             padding-top: 10px;
         }
-        .shift-entry {
-            font-size: 16px;
-        }
-        .shift-name {
-            font-weight: bold;
-            color: #333;
-        }
-        .shift-type {
-            font-style: italic;
-            color: #007BFF;
-        }
     </style>
     <script>
         let scheduleData = {};
@@ -117,28 +106,6 @@
                     shiftList.appendChild(listItem);
                 }
             });
-        }
-
-        function listShiftsForDate(date) {
-            let output = document.getElementById("dailyShifts");
-            output.innerHTML = "<h2>Mai ügyeletesek:</h2>";
-            let dutyList = [];
-            Object.keys(scheduleData).forEach(name => {
-                let shift = scheduleData[name][date];
-                if (shift && shift !== "Normál" && shift !== "Szabadság" && shift !== "") {
-                    dutyList.push(`<span class='shift-name'>${name}</span>: <span class='shift-type'>${shift}</span>`);
-                }
-            });
-            if (dutyList.length > 0) {
-                dutyList.forEach(item => {
-                    let listItem = document.createElement("p");
-                    listItem.className = "shift-entry";
-                    listItem.innerHTML = item;
-                    output.appendChild(listItem);
-                });
-            } else {
-                output.innerHTML += "<p>Nincs ügyeletes erre a napra.</p>";
-            }
         }
 
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
