@@ -46,6 +46,7 @@
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
                     populateNameDropdown();
+                    autoUpdateScheduleByDate();
                 })
                 .catch(error => console.error('Hiba az adatok lekérésekor:', error));
         }
@@ -102,7 +103,7 @@
             
             if (scheduleData[name.value]) {
                 Object.keys(scheduleData[name.value]).forEach(date => {
-                    if (date.startsWith(month.value)) {
+                    if (!month.value || date.startsWith(month.value)) {
                         output.innerHTML += `<p>${date}: ${scheduleData[name.value][date]}</p>`;
                     }
                 });
@@ -119,6 +120,12 @@
                     output.innerHTML += `<p>${name}: ${scheduleData[name][date]}</p>`;
                 }
             });
+        }
+        
+        function autoUpdateScheduleByDate() {
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById("dateSelect").value = today;
+            updateScheduleByDate();
         }
         
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
