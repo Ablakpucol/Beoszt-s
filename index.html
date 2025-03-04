@@ -43,6 +43,17 @@
             margin: 20px 0;
             padding-top: 10px;
         }
+        .shift-entry {
+            font-size: 16px;
+        }
+        .shift-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .shift-type {
+            font-style: italic;
+            color: #007BFF;
+        }
     </style>
     <script>
         let scheduleData = {};
@@ -80,20 +91,6 @@
             return data;
         }
 
-        function validateAndFormatDate(value) {
-            if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                return value;
-            }
-            if (typeof value === "string" && value.match(/^\d{4}\.\d{2}\.\d{2}$/)) {
-                return value.replaceAll(".", "-");
-            }
-            if (typeof value === "number") {
-                let date = new Date(Math.round((value - 25569) * 86400 * 1000));
-                return date.toISOString().split('T')[0];
-            }
-            return "";
-        }
-
         function populateNameDropdown() {
             let select = document.getElementById("nameSelect");
             select.innerHTML = '<option value="">--Válassz--</option>';
@@ -105,6 +102,23 @@
             });
         }
 
+        function listShiftsForMonth() {
+            let name = document.getElementById("nameSelect").value;
+            let month = document.getElementById("monthSelect").value;
+            let shiftList = document.getElementById("shiftList");
+            shiftList.innerHTML = "";
+            
+            if (!scheduleData[name]) return;
+            
+            Object.keys(scheduleData[name]).forEach(date => {
+                if (date.startsWith(month) && scheduleData[name][date] !== "Normál" && scheduleData[name][date] !== "Szabadság" && scheduleData[name][date] !== "") {
+                    let listItem = document.createElement("p");
+                    listItem.textContent = `${date}: ${scheduleData[name][date]}`;
+                    shiftList.appendChild(listItem);
+                }
+            });
+        }
+
         function listShiftsForDate(date) {
             let output = document.getElementById("dailyShifts");
             output.innerHTML = "<h2>Mai ügyeletesek:</h2>";
@@ -112,13 +126,14 @@
             Object.keys(scheduleData).forEach(name => {
                 let shift = scheduleData[name][date];
                 if (shift && shift !== "Normál" && shift !== "Szabadság" && shift !== "") {
-                    dutyList.push(`${name}: ${shift}`);
+                    dutyList.push(`<span class='shift-name'>${name}</span>: <span class='shift-type'>${shift}</span>`);
                 }
             });
             if (dutyList.length > 0) {
                 dutyList.forEach(item => {
                     let listItem = document.createElement("p");
-                    listItem.textContent = item;
+                    listItem.className = "shift-entry";
+                    listItem.innerHTML = item;
                     output.appendChild(listItem);
                 });
             } else {
@@ -132,12 +147,15 @@
 <body>
     <div class="container">
         <h2>Válaszd ki a neved:</h2>
-        <select id="nameSelect">
+        <select id="nameSelect" onchange="listShiftsForMonth()">
             <option value="">--Válassz--</option>
         </select>
-
-        <h2>Válassz dátumot:</h2>
-        <input type="date" id="dateSelect">
+        
+        <h2>Válassz hónapot:</h2>
+        <input type="month" id="monthSelect" onchange="listShiftsForMonth()">
+        
+        <h3>Ügyeletek az adott hónapban:</h3>
+        <div id="shiftList"></div>
     </div>
     
     <div class="separator"></div>
