@@ -71,9 +71,9 @@
                 .then(data => {
                     let json = JSON.parse(data.substring(47, data.length - 2));
                     scheduleData = processSheetData(json.table.rows);
-                    console.log("Beolvasott adatok:", scheduleData); // Debug log
                     populateNameDropdown();
-                    listShiftsForDate(new Date().toISOString().split('T')[0]); // Automatikus napi ügyeletesek
+                    listShiftsForMonth();
+                    listShiftsForDate(new Date().toISOString().split('T')[0]);
                 })
                 .catch(error => console.error('Hiba az adatok lekérésekor:', error));
         }
@@ -89,7 +89,7 @@
                 for (let j = 1; j < rows[i].c.length; j++) {
                     let date = dates[j - 1];
                     let shift = rows[i].c[j]?.v || "";
-                    if (date && shift) {
+                    if (date) {
                         data[name][date] = shift;
                     }
                 }
@@ -135,11 +135,10 @@
                 }
             });
         }
-
+        
         function listShiftsForDate(date) {
             let output = document.getElementById("shiftOutput");
             output.innerHTML = "";
-
             let dutyList = [];
             Object.keys(scheduleData).forEach(name => {
                 let shift = scheduleData[name][date];
@@ -147,7 +146,6 @@
                     dutyList.push(`${name}: ${shift}`);
                 }
             });
-
             if (dutyList.length > 0) {
                 dutyList.forEach(item => {
                     let listItem = document.createElement("li");
@@ -158,7 +156,7 @@
                 output.innerHTML = "<p>Nincs ügyeletes erre a napra.</p>";
             }
         }
-
+        
         document.addEventListener("DOMContentLoaded", fetchScheduleData);
     </script>
 </head>
