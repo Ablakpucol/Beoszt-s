@@ -102,8 +102,8 @@
             
             if (scheduleData[name]) {
                 Object.keys(scheduleData[name]).forEach(date => {
-                    if (date.startsWith(month) && scheduleData[name][date] === "Ügyelet") {
-                        output.innerHTML += `<p>${date}</p>`;
+                    if (date.startsWith(month)) {
+                        output.innerHTML += `<p>${date}: ${scheduleData[name][date]}</p>`;
                     }
                 });
             }
@@ -115,11 +115,8 @@
             output.innerHTML = "";
             
             Object.keys(scheduleData).forEach(name => {
-                if (scheduleData[name][date] === "Ügyelet") {
-                    output.innerHTML += `<p>${name}</p>`;
-                }
-                if (scheduleData[name][date] === "Szabadság") {
-                    output.innerHTML += `<p>${name} (Szabadság)</p>`;
+                if (scheduleData[name][date]) {
+                    output.innerHTML += `<p>${name}: ${scheduleData[name][date]}</p>`;
                 }
             });
         }
@@ -129,7 +126,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Ügyeletek listázása név alapján</h2>
+        <h2>Beosztás listázása név alapján</h2>
         <select id="nameSelect" onchange="updateScheduleByName()">
             <option value="">--Válassz nevet--</option>
         </select>
@@ -138,7 +135,7 @@
     </div>
     
     <div class="container">
-        <h2>Ügyeletesek listázása dátum alapján</h2>
+        <h2>Beosztás listázása dátum alapján</h2>
         <input type="date" id="dateSelect" onchange="updateScheduleByDate()">
         <div id="scheduleByDate"></div>
     </div>
