@@ -38,6 +38,11 @@
             max-width: 400px;
             margin: auto;
         }
+        .separator {
+            border-top: 2px solid #ccc;
+            margin: 20px 0;
+            padding-top: 10px;
+        }
     </style>
     <script>
         let scheduleData = {};
@@ -100,21 +105,9 @@
             });
         }
 
-        function updateSchedule() {
-            let name = document.getElementById("nameSelect").value;
-            let date = document.getElementById("dateSelect").value;
-            let output = document.getElementById("scheduleOutput");
-
-            if (scheduleData[name] && scheduleData[name][date]) {
-                output.textContent = "Beosztás: " + scheduleData[name][date];
-            } else {
-                output.textContent = "Nincs adat erre a napra.";
-            }
-        }
-
         function listShiftsForDate(date) {
-            let output = document.getElementById("scheduleOutput");
-            output.innerHTML = "";
+            let output = document.getElementById("dailyShifts");
+            output.innerHTML = "<h2>Mai ügyeletesek:</h2>";
             let dutyList = [];
             Object.keys(scheduleData).forEach(name => {
                 let shift = scheduleData[name][date];
@@ -129,7 +122,7 @@
                     output.appendChild(listItem);
                 });
             } else {
-                output.innerHTML = "<p>Nincs ügyeletes erre a napra.</p>";
+                output.innerHTML += "<p>Nincs ügyeletes erre a napra.</p>";
             }
         }
 
@@ -139,14 +132,19 @@
 <body>
     <div class="container">
         <h2>Válaszd ki a neved:</h2>
-        <select id="nameSelect" onchange="updateSchedule()">
+        <select id="nameSelect">
             <option value="">--Válassz--</option>
         </select>
 
         <h2>Válassz dátumot:</h2>
-        <input type="date" id="dateSelect" onchange="updateSchedule()">
-
-        <p id="scheduleOutput">Beosztás:</p>
+        <input type="date" id="dateSelect">
+    </div>
+    
+    <div class="separator"></div>
+    
+    <div class="container" id="dailyShifts">
+        <h2>Mai ügyeletesek:</h2>
+        <p>Nincs adat betöltve...</p>
     </div>
 </body>
 </html>
